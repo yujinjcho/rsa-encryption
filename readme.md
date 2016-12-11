@@ -47,7 +47,7 @@ To run tests
 # Example
 
 ```
->python rsa_sign "theAnswerIs42"
+>python rsa_sign.py "theAnswerIs42"
 ```
 
 Returns:
