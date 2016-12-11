@@ -30,6 +30,13 @@
 }
 ```
 
+# Set Up
+Make sure requirements are met. Older versions of OpenSSL in Python do not have a ```crypto.dump_publickey``` method. Set up virtual environment and install dependencies.
+
+```
+pip install -r requirements.txt
+```
+
 # Testing
 
 To run tests
