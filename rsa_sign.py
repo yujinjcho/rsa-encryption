@@ -14,9 +14,8 @@ def main(args):
 
 def signed_identifier(message):
     """Returns json with the original message, signature, and public key
-    based on RSA encryption. If the 'private.pem' file does not exist,
-    a new key-pair will be created and saved, otherwise, the information
-    will be retrieved from the file.
+    based on RSA encryption. Creates keys and saves private key if file
+    does not exist otherwise retrieves existing files.
 
     :param <str> message: must be less than 250 chars
     """
@@ -27,20 +26,39 @@ def signed_identifier(message):
         raise TypeError('Input must be string type')
 
     if os.path.exists(config.PRIVATE_FILE):
-        key_pair = _retrieve_key_pair()
-        signature = _create_signature(key_pair, message)
+        identifier = _retrieve_identifiers(message, config.PRIVATE_FILE)
     else:
-        key_pair = _create_key_pair_object()
-        signature = base64.b64encode(_create_signature(key_pair, message))
-        private_key = crypto.dump_privatekey(crypto.FILETYPE_PEM, key_pair)
-        _create_file(config.PRIVATE_FILE, private_key)
+        identifier = _create_identifiers(message, config.PRIVATE_FILE)
 
+    return json.dumps(identifier)
+
+def _create_identifiers(message, filename):
+    """Creates a new key-pair object, signature, and persists
+    private key to file system.
+
+    :param <str> message: must be less than 250 chars
+    """
+    key_pair = _create_key_pair_object()
+    signature = base64.b64encode(_create_signature(key_pair, message))
+    private_key = crypto.dump_privatekey(crypto.FILETYPE_PEM, key_pair)
+    _create_file(filename, private_key)
     return _format_response(message, signature, key_pair)
 
-def _retrieve_key_pair():
+def _retrieve_identifiers(message, filename):
+    """Retrieves key-pair based on existing private key
+    stored in file system. Creates new signature based
+    on received message.
+
+    :param <str> message: must be less than 250 chars
+    """
+    key_pair = _retrieve_key_pair(filename)
+    signature = _create_signature(key_pair, message)
+    return _format_response(message, signature, key_pair)
+
+def _retrieve_key_pair(filename):
     """Returns key-pair object based on private key stored in filesystem"""
 
-    private_key = open(config.PRIVATE_FILE, 'r').read()
+    private_key = open(filename, 'r').read()
     key_pair = crypto.load_privatekey(crypto.FILETYPE_PEM, private_key)
     return key_pair
 
@@ -85,7 +103,7 @@ def _create_signature(key_pair, message):
     return signature
 
 def _format_response(message, signature, key_pair):
-    """Formats and returns parameters in required json format.
+    """Formats and returns parameters in required format.
 
     :param <str> message: must be less than 250 chars
     :param <str> signature: signature based on message and private key
@@ -99,7 +117,7 @@ def _format_response(message, signature, key_pair):
         'signature': signature_base_64,
         'pubkey': pubkey
     }
-    return json.dumps(response)
+    return response
 
 if __name__ == '__main__':
     main(sys.argv)
