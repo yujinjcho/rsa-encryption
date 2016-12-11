@@ -4,7 +4,9 @@ import rsa_sign
 import json
 from OpenSSL import crypto
 
+
 class Test(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
         # setup for create_identifier
@@ -74,7 +76,6 @@ class Test(unittest.TestCase):
         self.assertTrue(isinstance(key_pair, crypto.PKey))
         self.assertTrue(key_pair.check())
 
-
     def test_create_certificate(self):
         cert = rsa_sign._create_certificate(self.key_pair)
         self.assertTrue(isinstance(cert, crypto.X509))
@@ -115,6 +116,7 @@ class Test(unittest.TestCase):
         os.remove(cls.create_identifier_filename)
         os.remove(cls.retrieve_file)
         os.remove(cls.create_filename)
+
 
 if __name__ == '__main__':
     unittest.main()
